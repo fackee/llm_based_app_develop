@@ -76,3 +76,16 @@ python -m autogpt run --gpt4only -c
 如果出现以下控制台画面就说明本地terminal程序启动成功了。
 
 ![alt text](image-4.png)
+
+## 补充-web_search超时问题
+
+**收到反应很多人开发代理，autogpt在使用web搜索是，报超时的错误。可以修改源码，强制加上本机的代理设置。**
+
+修改文件**AutoGPT/autogpts/autogpt/autogpt/commands/web_search.py**
+
+```
+ //results = DDGS().text(query)
+  results = DDGS(proxies={"https": "http://127.0.0.1:7088", "http": "http://127.0.0.1:7088"}).text(query)
+```
+如图
+![alt text](image-5.png)
