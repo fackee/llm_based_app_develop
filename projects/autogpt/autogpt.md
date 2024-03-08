@@ -66,6 +66,38 @@ ___
 ## 核心prompt
 
 ## 代码原理/主流程
+
+```
+sequenceDiagram
+		Main ->> Main: run_auto_gpt,入口
+		Main ->> Main: run_auto_gpt，輸入task
+    Main ->> Main: generate_agent_profile_for_task，調用大模型，返回任務的額外信息，通過openai function能力
+    Main ->> Main: run_interaction_loop,入口
+		loop cycles_remaining > 0
+			Main ->> BaseAgent: autogpts/autogpt/autogpt/agents/base.py
+			BaseAgent ->> BaseAgent: propose_action()
+			BaseAgent ->> BaseAgent: build_prompt()
+			BaseAgent ->> CommandRegistry: list_available_commands
+			CommandRegistry ->> BaseAgent: commands
+			BaseAgent ->> PromptStrategy: build_prompt(commands)
+      PromptStrategy ->> BaseAgent: prompt
+			BaseAgent ->> LlmProvider: create_chat_completion
+			BaseAgent ->> BaseAgent: self.on_before_think(prompt, scratchpad=self._prompt_scratchpad)
+			LlmProvider ->> Agent: raw_response
+      BaseAgent ->> BaseAgent: on_response(llm_response,prompt,scratchpad)
+			BaseAgent ->> BaseAgent: parse_and_process_response(llm_response,prompt,scratchpad)
+			BaseAgent ->> Agent: parse_and_process_response(llm_response,prompt,scratchpad)
+			alt cycles_remaining > 0
+				Agent --> Main: command,command_args
+				Main --> Agent: execute(command,command_args,input)
+      end
+
+		Main ->> Main: cycles_remaining--
+    end
+
+```
+
+
 ---
 # 总结
 AI Agent之于大模型工具增强，核心在于planning，通过提示词结合代码逻辑，让大模型有了规划的能力，能将一个复杂的任务进行拆分规划。
